@@ -333,7 +333,7 @@ class world:
 
     def create_water(self):
         x, y = pygame.mouse.get_pos()
-        part = particle(vect2d(x,y),vect2d(0,0))
+        part = particle(vect2d(x+random.randrange(-10, 10),y+random.randrange(-10, 10)),vect2d(0,0))
         self.new_force('const_grav',[part])
         self.particle_list.append(part)
 
