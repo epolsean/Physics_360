@@ -42,7 +42,7 @@ class LiquidTest(object):
 
         for i in xrange(particlesX):
             for j in xrange(particlesY):
-                p = Particle(self.water, i + 4, j + 4, 0.0, 0.0)
+                p = Water_Particle(self.water, i + 4, j + 4, 0.0, 0.0)
                 self.particles.append(p)
 
 
@@ -266,7 +266,7 @@ class Node(object):
         self.active = False
  
 
-class Particle(object):
+class Water_Particle(object):
 
     __slots__ = ['mat', 'x', 'y', 'u', 'v', 'dudx', 'dudy', 'dvdx',
                  'dvdy', 'cx', 'cy', 'px', 'py', 'gx', 'gy']
@@ -331,7 +331,7 @@ class Visual(object):
                     self.liquidTest.mx, self.liquidTest.my = event.pos'''
             if pygame.mouse.get_pressed()[0]:
                 x, y = pygame.mouse.get_pos()
-                p = Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0)
+                p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0)
                 self.liquidTest.particles.append(p)
 
             self.screen.fill(Color('white'))
