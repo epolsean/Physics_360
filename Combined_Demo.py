@@ -865,10 +865,10 @@ class collision_engine():
 		self.boundary()    #See if any particles collide with the wall
 		for p in combinations(self.all_particles,2):
 		    if p[0].shape =="liquid" and p[1].shape == "water_particle":
-    		       print p[0].pos.y,"<circle   waterp ->",p[1].y/.2475
-    		       if p[1].y/.255>= p[0].secretHeight:
+    		       #print p[0].pos.y,"<circle   waterp ->",p[1].y/.2475
+    		       if p[1].y/.2475>= p[0].secretHeight:
     		           print "in"
-    		           p[0].secretHeight = p[1].y/.255
+    		          # p[0].secretHeight = p[1].y/.255
     		       #else:
     		          
 		     
@@ -974,7 +974,7 @@ def main():
 
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-    liquidTest = LiquidTest(54, 154, 4, 15)
+    liquidTest = LiquidTest(54, 122, 4, 15)
     visual = Visual((200, 600), liquidTest)
     visual.set_numerical('rk4')  
 
