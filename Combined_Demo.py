@@ -42,7 +42,7 @@ class LiquidTest(object):
 
         for i in xrange(particlesX):
             for j in xrange(particlesY):
-                p = Water_Particle(self.water, i + 4, j + 4, 0.0, 0.0)
+                p = Water_Particle(self.water, i + 4, j + 104, 0.0, 0.0,"water_particle")
                 self.particles.append(p)
 
 
@@ -351,6 +351,7 @@ class liquid(particle):
 	self.UR = vect2d(int(self.pos.x + self.width/2),int(self.pos.y - self.height/2))
 	self.LL = vect2d(int(self.pos.x - self.width/2),int(self.pos.y + self.height/2))
 	self.LR = vect2d(int(self.pos.x + self.width/2),int(self.pos.y + self.height/2))
+	self.secretHeight = self.UR.y
 	self.r_c = vect2d(0,0)
 	self.xPrime = 0
         self.yPrime = 0
@@ -388,10 +389,12 @@ class liquid(particle):
 class Water_Particle(object):
 
     __slots__ = ['mat', 'x', 'y', 'u', 'v', 'dudx', 'dudy', 'dvdx',
-                 'dvdy', 'cx', 'cy', 'px', 'py', 'gx', 'gy']
+                 'dvdy', 'cx', 'cy', 'px', 'py', 'gx', 'gy','shape','inLiquid','m']
 
-    def __init__(self, mat, x, y, u, v):
-
+    def __init__(self, mat, x, y, u, v,shape):
+        self.m = 1
+        self.inLiquid = False
+        self.shape = shape
         self.mat = mat
         self.x = x
         self.y = y
@@ -475,8 +478,9 @@ class Visual(object):
 	    self.collision.find_collision()  #Check to see if object hits the walls
             if pygame.mouse.get_pressed()[0]:
                 x, y = pygame.mouse.get_pos()
-                p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0)
+                p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
                 self.liquidTest.particles.append(p)
+                self.all_particles.append(p)
 
             self.screen.fill(Color('white'))
             pygame.draw.line(self.screen, (0,0,0), (0,50), (125,100), 1)
@@ -488,14 +492,15 @@ class Visual(object):
             for particle in self.liquid_list:
   		    if particle.shape =="liquid":
   		      #pygame.draw.rect(self.screen,(0,0,255),[(int(particle.UL.x),int(particle.UL.y)),(int(particle.UR.x),int(particle.UR.y)),(int(particle.LR.x),int(particle.LR.y)),(int(particle.LL.x),int(particle.LL.y)),0])  
-    		      pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)],False)
-		  
+    		      #pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)],False)
+		      pygame.draw.rect(self.screen, (0,0,255), [particle.UL.x, particle.secretHeight, particle.LR.x, particle.LR.y],2)
 		  
 	    for particle in self.particle_list:
                     if particle.shape == "circle":
 		      pygame.draw.circle(self.screen, (0,0,255), (int(particle.pos.x), int(particle.pos.y)), particle.size, 1)	  
 	    ################
             self.liquidTest.simulate()
+            print len(self.liquidTest.particles)
             self.line_boundary(vect2d(0,50/4),vect2d(125/4,100/4))
             self.line_boundary(vect2d(75/4,200/4),vect2d(200/4,150/4))
             self.line_boundary(vect2d(0,250/4),vect2d(125/4,300/4))
@@ -599,7 +604,7 @@ class Visual(object):
 		    if particle.shape =="rectangle":
 		      particle.theta = particle.theta + particle.omega
 		      #particle.theta = particle.theta+particle.omega*self.dt  
-		      print particle.pos.x+particle.width/2, particle.UL.x
+		      #print particle.pos.x+particle.width/2, particle.UL.x
 		      
 		      #pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)])
 		
@@ -744,13 +749,16 @@ class Visual(object):
                 #print particle.vel
                 vol = 1.3333333 * 3.14 * math.pow(particle.size, 3)
                 #print particle.d
-                buoyancy = .0005 * particle.area * self.g 
-                if particle.inLiquid == True:    
-                    particle.f_net= particle.f_net - buoyancy
-                    #print particle.f_net,"after" 
-                elif particle.inLiquid == False:
-                    particle.f_net = particle.f_net
-                #return buoyancy
+                buoyancy = .0005 * particle.area * self.g
+                if particle.shape == "circle": 
+                    if particle.inLiquid == True:    
+                        particle.f_net= particle.f_net - buoyancy
+                        #print particle.f_net,"after" 
+                    elif particle.inLiquid == False:
+                        particle.f_net = particle.f_net
+                    #return buoyancy
+                elif particle.shape == "water particle":
+                    print "Test"
             
             
     def object_gravity(self, mass):
@@ -773,7 +781,7 @@ class Visual(object):
 		      p = .5
 		      i.drag_coeff = .05
 		      dragF = p*i.vel.mag2()*-i.drag_coeff*i.vel.norm()
-		      print dragF,"drag"
+		      #print dragF,"drag"
 		      i.f_net = i.f_net + dragF
 		  elif i.vel.mag() > self.vel_max:
 		      i.drag_coeff = .000001
@@ -851,19 +859,27 @@ class collision_engine():
 
 		Needs to check and see if particle has a rod connection and if it does, call check_rod_constraint
 		"""
-		print "trying"
+		
 		self.has_collided = []   #Reset collisions
 		self.has_collidedR = []
 		self.boundary()    #See if any particles collide with the wall
 		for p in combinations(self.all_particles,2):
-		    if p[0].shape =="liquid":
-		      print p[1].pos.y - p[0].UR.y
-		      if p[0].UR.y<=p[1].pos.y:
+		    if p[0].shape =="liquid" and p[1].shape == "water_particle":
+    		       print p[0].pos.y,"<circle   waterp ->",p[1].y/.2475
+    		       if p[1].y/.255>= p[0].secretHeight:
+    		           print "in"
+    		           p[0].secretHeight = p[1].y/.255
+    		       #else:
+    		          
+		     
+
+		    elif p[0].shape =="liquid" and p[1].shape == "circle":
+		      #print p[1].pos.y - p[0].UR.y
+		      if p[0].secretHeight<=p[1].pos.y:
 		         
 		          p[1].inLiquid = True
 		       
 		          if p[1].pos.y - p[0].UR.y>= p[1].size:
-		           
 		              p[1].submerged = True
 		          p[1].d = ((p[1].pos.y - p[0].UR.y)/(self.world.height-p[0].UR.y))
 		        
@@ -879,8 +895,36 @@ class collision_engine():
 				self.check_rod_constraint(p[0],p[1],p[0].rod_connection[p[1]])
 		
 		if len(self.has_collided)> 0:  #If any particles have collided
-			self.resolve_collision()    
-		
+			self.resolve_collision()  
+	
+	def bounding_sphere(self,particle1,particle2):
+		"""Check for overlap using bounding spheres"""
+		if particle1.shape == "circle" and particle2.shape == "circle":
+                    combinedSize = particle1.size + particle2.size
+  		    if(abs(particle1.pos.x-particle2.pos.x) <= combinedSize):
+  		        if(abs(particle1.pos.y-particle2.pos.y) <= combinedSize):
+  		            self.has_collided.append([particle1,particle2])
+                        self.resolve_collision()  
+	      
+	def resolve_collision(self):
+		"""Changes velocities of point particles that have collided"""
+                for particles in self.has_collided:
+                    if particles[0].shape == "rectangle" or particles[1].shape == "rectangle":
+                        self.rectangle_collision()
+                    else:
+      		    #print particles[0],particles[1]
+          		    rHat = self.collision_normal(particles[0],particles[1])
+          		    
+          		    difference = particles[1].vel-particles[0].vel
+          		    dv1 = (particles[1].m*(particles[0].cor)*(difference.dot(rHat)))/(particles[0].m+particles[1].m)
+            		  
+          		    dv2 = (-particles[0].m*(particles[1].cor)*(difference.dot(rHat)))/(particles[0].m+particles[1].m)
+          		    
+          		    particles[0].vel.x = particles[0].vel.x +dv1*rHat.x
+          		    particles[0].vel.y = particles[0].vel.y +dv1*rHat.y
+          		    
+          		    particles[1].vel.x = particles[1].vel.x +dv2*rHat.x
+          		    particles[1].vel.y = particles[1].vel.y +dv2*rHat.y	
 	def boundary(self):
 		"""Checks to see if part of a particle leaves the screen.  Should shift particle back on to screen and reverse component of velocity
 
@@ -930,12 +974,12 @@ def main():
 
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-    liquidTest = LiquidTest(54, 154, 10, 1)
+    liquidTest = LiquidTest(54, 154, 4, 15)
     visual = Visual((200, 600), liquidTest)
     visual.set_numerical('rk4')  
 
     water = liquid(visual)
-    r1 = vect2d(150,400)
+    r1 = vect2d(35,400)
     v1 = vect2d(0,0)
     part1 = particle(r1,v1)
     visual.add_particle(water)
