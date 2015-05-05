@@ -42,7 +42,7 @@ class LiquidTest(object):
 
         for i in xrange(particlesX):
             for j in xrange(particlesY):
-                p = Water_Particle(self.water, i + 4, j + 4, 0.0, 0.0,"water_particle")
+                p = Water_Particle(self.water, i + 4, j + 64, 0.0, 0.0,"water_particle")
                 self.particles.append(p)
 
 
@@ -487,7 +487,7 @@ class Visual(object):
                 if particle.shape =="liquid":
                     #pygame.draw.rect(self.screen,(0,0,255),[(int(particle.UL.x),int(particle.UL.y)),(int(particle.UR.x),int(particle.UR.y)),(int(particle.LR.x),int(particle.LR.y)),(int(particle.LL.x),int(particle.LL.y)),0])  
                     #pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)],False)
-                    pygame.draw.rect(self.screen, (0,0,255), [particle.UL.x, particle.secretHeight, particle.LR.x, particle.LR.y],0)
+                    pygame.draw.rect(self.screen, (0,0,255), [particle.UL.x, particle.secretHeight+5, particle.LR.x, particle.LR.y],2)
                     		  
             for particle in self.particle_list:
                 if particle.shape == "circle":
@@ -666,6 +666,7 @@ class Visual(object):
         
         for particle in particles:
             vol = 1.3333333 * 3.14 * math.pow(particle.size, 3)
+            #vol2 = particle.width*particle.height
             buoyancy = .0005 * particle.area * self.g
             if particle.shape == "circle": 
                 if particle.inLiquid == True:    
@@ -781,12 +782,16 @@ class collision_engine():
 		    if p[0].shape =="liquid" and p[1].shape == "water_particle":
     		       #print p[0].pos.y,"<circle   waterp ->",p[1].y/.2475
     		       if p[1].y/.2475>= p[0].secretHeight:
-    		           print "in"
-    		          # p[0].secretHeight = p[1].y/.255
-    		       #else:
-    		          
-		     
-
+    		           #print "in"
+    		           if(len(self.world.liquidTest.particles)>200):
+    		               
+    		               self.world.liquidTest.particles.pop(0)
+    		               self.world.all_particles.pop(2)
+    		              
+    		           p[0].secretHeight = p[1].y/.255
+    		           
+    		           
+    		  
 		    elif p[0].shape =="liquid" and p[1].shape == "circle":
 		      #print p[1].pos.y - p[0].UR.y
 		      if p[0].secretHeight<=p[1].pos.y:
@@ -803,14 +808,14 @@ class collision_engine():
 		          #print p[1].inLiquid
 		    
 		        
-		for p in combinations(self.particle_list,2):
+		'''for p in combinations(self.particle_list,2):
 			self.bounding_sphere(p[0],p[1])
 			if p[0] in p[1].rod_connection:
 				self.check_rod_constraint(p[0],p[1],p[0].rod_connection[p[1]])
 		
 		if len(self.has_collided)> 0:  #If any particles have collided
 			self.resolve_collision()  
-	
+	        '''
 	def bounding_sphere(self,particle1,particle2):
 		"""Check for overlap using bounding spheres"""
 		if particle1.shape == "circle" and particle2.shape == "circle":
@@ -894,7 +899,7 @@ def main():
 
     water = liquid(visual,vect2d(100,0))
     r1 = vect2d(35,200)
-    v1 = vect2d(0,0)
+    v1 = vect2d(0,10)
     part1 = particle(r1,v1)
     visual.add_particle(water)
     visual.add_particle(part1)
