@@ -451,6 +451,7 @@ class Visual(object):
         self.vel_max = 50     #Velocity at which the drag force kicks in
         self.rod_color=(120,120,0)  #NEW: Used for color of connecting rods
         self.collision = collision_engine(self,self.particle_list,self.all_particles) 
+        self.solid = False
         ##################
     
     def run(self):
@@ -463,6 +464,12 @@ class Visual(object):
                 if event.type == QUIT:
                     pygame.quit()
                     raise SystemExit
+                if event.type == MOUSEBUTTONDOWN:
+                    self.liquidTest.pressed = True
+                elif event.type == MOUSEBUTTONUP:
+                    self.liquidTest.pressed = False
+                elif event.type == MOUSEMOTION:
+                    self.liquidTest.mx, self.liquidTest.my = event.pos
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (pick_x,pick_y) = pygame.mouse.get_pos()   #Get mouse position on screen
                     picked = vect2d(pick_x,pick_y)  #Turn mouse position into a vector
@@ -481,6 +488,11 @@ class Visual(object):
                         p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
                         self.liquidTest.particles.append(p)
                         self.all_particles.append(p)
+                    if event.key == pygame.K_RETURN:
+                        if self.solid == True:
+                            self.solid = False
+                        else:
+                            self.solid = True
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_c:
                         self.pop =True
@@ -493,12 +505,6 @@ class Visual(object):
                         self.liquidTest.particles.pop(0)
                 if(len(self.all_particles)>2):
     		      self.all_particles.pop(2)
-                '''if event.type == MOUSEBUTTONDOWN:
-                    self.liquidTest.pressed = True
-                elif event.type == MOUSEBUTTONUP:
-                    self.liquidTest.pressed = False
-                elif event.type == MOUSEMOTION:
-                    self.liquidTest.mx, self.liquidTest.my = event.pos'''
                 
             #self.display()
             
@@ -520,7 +526,10 @@ class Visual(object):
                 if particle.shape =="liquid":
                     #pygame.draw.rect(self.screen,(0,0,255),[(int(particle.UL.x),int(particle.UL.y)),(int(particle.UR.x),int(particle.UR.y)),(int(particle.LR.x),int(particle.LR.y)),(int(particle.LL.x),int(particle.LL.y)),0])  
                     #pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)],False)
-                    pygame.draw.rect(self.screen, (0,0,255), [particle.UL.x, particle.secretHeight+5, particle.LR.x, particle.LR.y],2)
+                    if self.solid == False:
+                        pygame.draw.rect(self.screen, (0,0,255), [particle.UL.x, particle.secretHeight+5, particle.LR.x, particle.LR.y],2)
+                    else:
+                        pygame.draw.rect(self.screen, (0,0,255), [particle.UL.x, particle.secretHeight+5, particle.LR.x, particle.LR.y],0)
                     		  
             for particle in self.particle_list:
                 if particle.shape == "circle":
@@ -945,7 +954,7 @@ def main():
 
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-    liquidTest = LiquidTest(54, 80, 4, 15)
+    liquidTest = LiquidTest(54, 81, 4, 15)
     visual = Visual((200, 400), liquidTest)
     visual.set_numerical('rk4')  
 
