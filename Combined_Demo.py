@@ -433,6 +433,7 @@ class Visual(object):
         self.screen = pygame.display.set_mode(screenSize)
         self.clock = pygame.time.Clock()
         self.pop = False
+        self.spawn = False
         ###################
         self.particle_list = []
         self.liquid_list = []
@@ -464,12 +465,12 @@ class Visual(object):
                 if event.type == QUIT:
                     pygame.quit()
                     raise SystemExit
-                if event.type == MOUSEBUTTONDOWN:
+                '''if event.type == MOUSEBUTTONDOWN:
                     self.liquidTest.pressed = True
                 elif event.type == MOUSEBUTTONUP:
                     self.liquidTest.pressed = False
                 elif event.type == MOUSEMOTION:
-                    self.liquidTest.mx, self.liquidTest.my = event.pos
+                    self.liquidTest.mx, self.liquidTest.my = event.pos'''
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (pick_x,pick_y) = pygame.mouse.get_pos()   #Get mouse position on screen
                     picked = vect2d(pick_x,pick_y)  #Turn mouse position into a vector
@@ -483,29 +484,36 @@ class Visual(object):
                     self.selected.color = (0,0,255)  #change color back to blue
                     self.force_que.remove(['mouse_pull',[self.selected]])   #Remove force from force_que
                     self.selected = None    #No particles are selected
+               
+                    
+                        
+                    
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_c:
+                        self.pop =True
                     if event.key == pygame.K_z:
-                        p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
-                        self.liquidTest.particles.append(p)
-                        self.all_particles.append(p)
-                    if event.key == pygame.K_RETURN:
+                        self.spawn = True
+                    elif event.key == pygame.K_RETURN:
                         if self.solid == True:
                             self.solid = False
                         else:
                             self.solid = True
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_c:
-                        self.pop =True
                 if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_c:
+                    #if event.key == pygame.K_c:
                         self.pop =False
+                    #elif event.key == pygame.K_z:
+                        self.spawn = False;
                 
             if self.pop == True:
                 if(len(self.liquidTest.particles)>0):
                         self.liquidTest.particles.pop(0)
                 if(len(self.all_particles)>2):
     		      self.all_particles.pop(2)
-                
+    	       
+            if self.spawn == True:  
+                p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
+                self.liquidTest.particles.append(p)
+                self.all_particles.append(p)  
             #self.display()
             
                 
@@ -837,9 +845,9 @@ class collision_engine():
 		self.boundary()    #See if any particles collide with the wall
 		for p in combinations(self.all_particles,2):
 		    if p[0].shape =="liquid" and p[1].shape == "water_particle":
-    		       #print p[0].pos.y,"<circle   waterp ->",p[1].y/.2475
+    		       
     		       if p[1].y/.2475>= p[0].secretHeight:
-    		           #print "in"
+    		         
     		           if(len(self.world.liquidTest.particles)>200):
     		               
     		               self.world.liquidTest.particles.pop(0)
