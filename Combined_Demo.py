@@ -432,7 +432,7 @@ class Visual(object):
         self.screenSize = screenSize
         self.screen = pygame.display.set_mode(screenSize)
         self.clock = pygame.time.Clock()
-        
+        self.pop = False
         ###################
         self.particle_list = []
         self.liquid_list = []
@@ -455,26 +455,59 @@ class Visual(object):
     
     def run(self):
         self.collision = collision_engine(self,self.particle_list,self.all_particles)   #This creates an instance of the collision engine
-        
+        self.game_controls()
         while True:
     
             for event in pygame.event.get():
+                
                 if event.type == QUIT:
                     pygame.quit()
                     raise SystemExit
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    (pick_x,pick_y) = pygame.mouse.get_pos()   #Get mouse position on screen
+                    picked = vect2d(pick_x,pick_y)  #Turn mouse position into a vector
+                    for i in self.particle_list:
+                        dist = i.pos - picked   #How far the mouse is from the center of a particle
+                        if dist.mag() < i.size:  #If mouse click is inside circle
+                            self.selected = i
+                            self.new_force('mouse_pull',[self.selected])  #Add mouse force to force_que
+                            self.selected.color = (255,0,0)   #Change color
+                if event.type == pygame.MOUSEBUTTONUP and self.selected != None:
+                    self.selected.color = (0,0,255)  #change color back to blue
+                    self.force_que.remove(['mouse_pull',[self.selected]])   #Remove force from force_que
+                    self.selected = None    #No particles are selected
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_z:
+                        p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
+                        self.liquidTest.particles.append(p)
+                        self.all_particles.append(p)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_c:
+                        self.pop =True
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_c:
+                        self.pop =False
+                
+            if self.pop == True:
+                if(len(self.liquidTest.particles)>0):
+                        self.liquidTest.particles.pop(0)
+                if(len(self.all_particles)>2):
+    		      self.all_particles.pop(2)
                 '''if event.type == MOUSEBUTTONDOWN:
                     self.liquidTest.pressed = True
                 elif event.type == MOUSEBUTTONUP:
                     self.liquidTest.pressed = False
                 elif event.type == MOUSEMOTION:
                     self.liquidTest.mx, self.liquidTest.my = event.pos'''
-                    
+                
             #self.display()
+            
+                
             getattr(self,self.numerical)()
             self.collision.find_collision()  #Check to see if object hits the walls
-            if pygame.mouse.get_pressed()[0]:
+            if pygame.mouse.get_pressed()[2]:
                 x, y = pygame.mouse.get_pos()
-                p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
+                p = Water_Particle(self.liquidTest.water, (x+random.randrange(-4,4))/4, (y+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
                 self.liquidTest.particles.append(p)
                 self.all_particles.append(p)
 
@@ -501,13 +534,16 @@ class Visual(object):
             pygame.draw.rect(self.screen,(200,200,235),(7,0,17,18),0)
             pygame.draw.rect(self.screen,(200,200,235),(5,12,21,6),0)
             pygame.display.update()
-            pygame.display.set_caption('fps: %d' % self.clock.get_fps())
+            pygame.display.set_caption('fps: %d' % self.clock.get_fps()," len %d" % len(self.liquidTest.particles))
 
             self.clock.tick(60)
     
     def line_boundary(self,start,end):
         r = start-end
         m = r.y/r.x
+        
+        r2 = (start*4)-(end*4)
+        m2 = r2.y/r2.x
         for i in self.liquidTest.particles:
             if i.x >= start.x and i.x < end.x:
                 if start.x == 0:
@@ -519,6 +555,18 @@ class Visual(object):
                     i.v = -i.v/3
                     i.u += 1/(1000*m)
                     
+        for i in self.particle_list:
+            if i.pos.x >=start.x*4 and i.pos.x<end.x*4:
+                if start.x == 0:
+                    y = m2*(i.pos.x)+start.y*4
+                elif start.x*4 == 75:
+                    y = m2*(i.pos.x)+start.y*4+30
+                if i.pos.y <= y+1 and i.pos.y > y-1:
+            
+                    i.pos.y = y-1.001
+                    
+                    #Si.vel.x *= -1
+                    i.vel.y *= -1 
    ##############################################################
    
    
@@ -666,8 +714,8 @@ class Visual(object):
         
         for particle in particles:
             vol = 1.3333333 * 3.14 * math.pow(particle.size, 3)
-            #vol2 = particle.width*particle.height
-            buoyancy = .0005 * particle.area * self.g
+            vol2 = particle.size* (particle.size*particle.d)*particle.size
+            buoyancy = .0005 * particle.area*particle.d * self.g
             if particle.shape == "circle": 
                 if particle.inLiquid == True:    
                     particle.f_net= particle.f_net - buoyancy
@@ -794,14 +842,18 @@ class collision_engine():
     		  
 		    elif p[0].shape =="liquid" and p[1].shape == "circle":
 		      #print p[1].pos.y - p[0].UR.y
+		      
 		      if p[0].secretHeight<=p[1].pos.y:
 		         
 		          p[1].inLiquid = True
 		       
 		          if p[1].pos.y - p[0].UR.y>= p[1].size:
 		              p[1].submerged = True
-		          p[1].d = ((p[1].pos.y - p[0].UR.y)/(self.world.height-p[0].UR.y))
-		        
+		          if(abs(p[1].pos.y-p[0].secretHeight)>p[1].size):
+		              p[1].d = 1
+		          else:
+		              p[1].d=abs(p[1].pos.y-p[0].secretHeight)/p[1].size
+		          #print p[1].d
 		      else:
 		          p[1].inLiquid = False
 		          p[1].submerged = True
@@ -852,19 +904,19 @@ class collision_engine():
 		for particle in self.particle_list:
 		    if particle.shape == "circle" :
               		if particle.pos.x > self.world.width - particle.size:
-              		    particle.vel.x *= -1
+              		    particle.vel.x *= -1*self.cor
               		    particle.pos.x = self.world.width - particle.size
               		elif particle.pos.x < 0+particle.size:
-             		     particle.vel.x *= -1
+             		     particle.vel.x *= -1*self.cor
              		     particle.pos.x = particle.size
              		     
           		if particle.pos.y > self.world.height - particle.size:
           		    particle.pos.y = self.world.height-particle.size
-              		    particle.vel.y *= -1
+              		    particle.vel.y *= -1*self.cor
               		elif particle.pos.y < 0+particle.size:
              		     particle.pos.y = particle.size
-             		     particle.vel.y *= -1
-             		     
+             		     particle.vel.y *= -1*self.cor
+             	    '''	     
                     elif particle.shape == "rectangle":
                         
                         maxW = max(particle.UL.x,particle.UR.x,particle.LL.x,particle.LR.x)
@@ -888,7 +940,7 @@ class collision_engine():
           		elif particle.pos.y < 0+bHeight:
           		     particle.pos.y = bHeight
          		     particle.vel.y *= -1*particle.cor	
-
+                    '''
 def main():
 
     os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -906,6 +958,7 @@ def main():
     visual.new_force('const_grav',[part1])
     visual.new_force("object_buoyancy",[part1])
     visual.new_force('drag',[part1])
+    #visual.new_force('game_controls')
 
     
     
