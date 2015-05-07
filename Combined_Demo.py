@@ -476,9 +476,9 @@ class Visual(object):
                 
             if self.pop == True: #If pop is true, delete oldest particles
                 if(len(self.liquidTest.particles)>0):
-                        self.liquidTest.particles.pop(0)
+                    self.liquidTest.particles.pop(0)
                 if(len(self.all_particles)>2):
-    		      self.all_particles.pop(2)
+                    self.all_particles.pop(2)
     	       
             if self.spawn == True: #If spawn is true, spawn particles at pipe's location
                 p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
@@ -537,7 +537,7 @@ class Visual(object):
     def line_boundary(self,start,end):
         r = start-end
         m = r.y/r.x
-        
+        ########
         r2 = (start*4)-(end*4)
         m2 = r2.y/r2.x
         for i in self.liquidTest.particles:
@@ -611,7 +611,7 @@ class Visual(object):
         for particle in self.particle_list:
             if particle.shape == "circle":
                 pygame.draw.circle(self.screen, (0,0,255), (int(particle.pos.x), int(particle.pos.y)), particle.size, 1)
-
+            
         for particle in self.liquid_list:
             if particle.shape =="liquid":
                 pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)],False)
@@ -689,7 +689,7 @@ class Visual(object):
                     print "Test"
     
     #Get rid of? doesnt do anything if removed?
-    """
+
     def object_gravity(self, mass):
         gravity_force = mass * self.gravity #N
         return gravity_force
@@ -698,7 +698,7 @@ class Visual(object):
     def surface_area(self, radius):
         area = 4 * self.pi * math.pow(radius, 2)
         return area
-    """
+
         
     def drag(self,particles):
         """Apply drag force to particles
@@ -780,8 +780,8 @@ class collision_engine():
                         p[1].d = 1
                     else:
                         p[1].d=abs(p[1].pos.y-p[0].secretHeight)/p[1].size
-            else:
-                p[1].inLiquid = False
+                else:
+                    p[1].inLiquid = False
 
 
     def bounding_sphere(self,particle1,particle2):
@@ -838,7 +838,7 @@ def main():
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
     liquidTest = LiquidTest(54, 81, 4, 15)
-    visual = Visual((500, 400), liquidTest) #Sets window of world
+    visual = Visual((200, 400), liquidTest) #Sets window of world
     visual.set_numerical('rk4')  
 
     water = liquid(visual,vect2d(100,0))
