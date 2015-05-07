@@ -11,26 +11,20 @@ import math
 
 
 class LiquidTest(object):
-    
     def __init__(self, gsizeX, gsizeY, particlesX, particlesY):
-
         self.particles = []
-
         self.gsizeX = gsizeX
         self.gsizeY = gsizeY
         self.particlesX = particlesX
         self.particlesY = particlesY
-
         self.active = []
         self.water = Material(1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
         self.pressed = False
         self.pressedprev = False
-
         self.mx = 0
         self.my = 0
         self.mxprev = 0
         self.myprev = 0
-
         i = j = 0
         self.grid = []
 
@@ -45,9 +39,8 @@ class LiquidTest(object):
                 p = Water_Particle(self.water, i + 4, j + 64, 0.0, 0.0,"water_particle")
                 self.particles.append(p)
 
-
-    def paint(self, screen):
-
+    def draw(self, screen):
+        """Method to draw blue water particles on screen"""
         for p in self.particles:
             start = [4.0 * p.x, 4.0 * p.y]
             end = [4.0 * (p.x - p.u), 4.0 * (p.y - p.v)]
@@ -57,9 +50,8 @@ class LiquidTest(object):
             mid = map(int, mid)
             pygame.draw.circle(screen, Color('blue'), mid, 5, 0)
 
-
+    ###########Comments here, and comment next to equations if need be
     def simulate(self):
-
         drag = False
         mdx = mdy = 0.0
 
@@ -241,13 +233,12 @@ class LiquidTest(object):
             elif p.y > self.gsizeY - 2:
                 p.y = (self.gsizeY - 2 - random.randint(0, 100) / 10000.0)
                 p.v = 0.0
- 
+   #######################
+                
 class Node(object):
-
     __slots__ = ['m', 'd', 'gx', 'gy', 'u', 'v', 'ax', 'ay', 'active']
-
+    ###############Comments here maybe?
     def __init__(self):
-
         self.m = 0
         self.d = 0
         self.gx = 0
@@ -260,74 +251,69 @@ class Node(object):
     
 
     def clear(self):
-
         self.m = self.d = self.gx = self.gy = self.u = \
         self.v = self.ax = self.ay = 0.0
         self.active = False
 
- 
+     ##################
    
 class particle:
-	def __init__(self,pos, vel, mass = 1.0, size = 10, shape = "circle", color = (0,0,255)):
-		self.pos = pos   #Position vector
-		self.vel = vel   #Velocity vectorB
-		self.m = mass    #Particle mass
-		self.m_inv = 1/mass
-		self.d = 0
-		self.size = size #Radius for circle and width and height for rectangle
-		self.color = color
-		self.shape = shape  #String with the name of the shape
-		self.f_net = vect2d(0,0)   #Property to keep track of net force on particle
-		self.pos_old = vect2d(0,0)
-		self.vel_old = vect2d(0,0)
-		self.f_net_old = vect2d(0,0)
-		self.k1 = vect2d(0,0)
-		self.k2 = vect2d(0,0)
-		self.k3 = vect2d(0,0)
-		self.k4 = vect2d(0,0)
-		self.L1 = vect2d(0,0)
-		self.L2 = vect2d(0,0)
-		self.L3 = vect2d(0,0)
-		self.L4 = vect2d(0,0)
-		self.inLiquid = False
-		self.submerged = False
-		self.area = 1.3333*3.14*size**3#1.3333333 * self.pi * math.pow(size/2, 3) #m^3
-		self.drag_coeff = 0.000001   #Scaling number for drag force
-		self.cor = .99     #Coefficient of restitution
-		self.rod_connection={}  #NEW: Dictionary of all rod constraint connections
-		#self.screen,(0,0,255),True,[((particle.pos.x-particle.width/2)*math.cos(particle.theta),particle.pos.y-particle.height/2),(particle.pos.x-particle.width/2,particle.pos.y+particle.height/2),(particle.pos.x+particle.width/2,particle.pos.y+particle.height/2),(particle.pos.x+particle.width/2,particle.pos.y-particle.height/2)
+    def __init__(self,pos, vel, mass = 1.0, size = 10, shape = "circle", color = (0,0,255)):
+        self.pos = pos   #Position vector
+        self.vel = vel   #Velocity vectorB
+        self.m = mass    #Particle mass
+        self.m_inv = 1/mass
+        self.d = 0
+        self.size = size #Radius for circle and width and height for rectangle
+        self.color = color
+        self.shape = shape  #String with the name of the shape
+        self.f_net = vect2d(0,0)   #Property to keep track of net force on particle
+        self.pos_old = vect2d(0,0)
+        self.vel_old = vect2d(0,0)
+        self.f_net_old = vect2d(0,0)
+        self.k1 = vect2d(0,0)
+        self.k2 = vect2d(0,0)
+        self.k3 = vect2d(0,0)
+        self.k4 = vect2d(0,0)
+        self.L1 = vect2d(0,0)
+        self.L2 = vect2d(0,0)
+        self.L3 = vect2d(0,0)
+        self.L4 = vect2d(0,0)
+        self.inLiquid = False
+        self.area = 1.3333*3.14*size**3#1.3333333 * self.pi * math.pow(size/2, 3) #m^3
+        self.drag_coeff = 0.000001   #Scaling number for drag force
+        self.cor = .99     #Coefficient of restitution
 
 
-	def add_force(self,force):
-		"""Add force to the net force vector for each particle"""
-		self.f_net += force
+    def add_force(self,force):
+        """Add force to the net force vector for each particle"""
+        self.f_net += force
 
 
-	def reset_force(self):
-		"""Set net force to zero
+    def reset_force(self):
+        """Set net force to zero
 
-		Call this at the start of each time step to reset net forces for each particle
-		"""
-		self.f_net = vect2d(0,0) 
+        Call this at the start of each time step to reset net forces for each particle
+        """
+        self.f_net = vect2d(0,0) 
 
 
-	def get_force(self):
-		"""Return f_net property"""
-		return self.f_net
+    def get_force(self):
+        """Return f_net property"""
+        return self.f_net
 
-	def set_pos(self,new_pos):
-		"""Set the position of the particle
+    def set_pos(self,new_pos):
+        """Set the position of the particle
 
-		Make sure that new_pos is a vect2d object
-		"""
-		self.pos = new_pos
+        Make sure that new_pos is a vect2d object
+        """
+        self.pos = new_pos
   
 class liquid(particle):
     def __init__(self,world,pos= vect2d(0,0) ,volume = 0.0001,height=100,width=100,shape = "liquid", color = (0,0,255)):
         self.width = world.width
         self.height = world.height/4
         self.pos = vect2d(self.width/2,self.height*3.5)
-        #self.size = size #Radius for circle and width and height for rectangle
         self.color = color
         self.shape = shape  #String with the name of the shape
         self.f_net = vect2d(0,0)   #Property to keep track of net force on particle	
@@ -341,7 +327,6 @@ class liquid(particle):
         self.L2 = vect2d(0,0)
         self.L3 = vect2d(0,0)
         self.L4 = vect2d(0,0)
-        #(particle.pos.x-particle.width/2,particle.pos.y-particle.height/2),(particle.pos.x-particle.width/2,particle.pos.y+particle.height/2),(particle.pos.x+particle.width/2,particle.pos.y+particle.height/2),(particle.pos.x+particle.width/2,particle.pos.y-particle.height/2)
         self.UL = vect2d(int(self.pos.x - self.width/2),int(self.pos.y - self.height/2))
         self.UR = vect2d(int(self.pos.x + self.width/2),int(self.pos.y - self.height/2))
         self.LL = vect2d(int(self.pos.x - self.width/2),int(self.pos.y + self.height/2))
@@ -356,37 +341,37 @@ class liquid(particle):
         self.size = (self.UL-self.LR).mag()/2
         self.drag_coeff = 0.000001   #Scaling number for drag force
         self.cor = .99     #Coefficient of restitution
-        self.rod_connection={}  #NEW: Dictionary of all rod constraint connections
+
 	
-	def add_force(self,force):
-		"""Add force to the net force vector for each particle"""
-		self.f_net += force
+    
+    def add_force(self,force):
+        """Add force to the net force vector for each particle"""
+        self.f_net += force
 
 
-	def reset_force(self):
-		"""Set net force to zero
+    def reset_force(self):
+        """Set net force to zero
 
-		Call this at the start of each time step to reset net forces for each particle
-		"""
-		self.f_net = vect2d(0,0) 
+        Call this at the start of each time step to reset net forces for each particle
+        """
+        self.f_net = vect2d(0,0) 
 
 
-	def get_force(self):
-		"""Return f_net property"""
-		return self.f_net
+    def get_force(self):
+        """Return f_net property"""
+        return self.f_net
 
-	def set_pos(self,new_pos):
-		"""Set the position of the particle
+    def set_pos(self,new_pos):
+        """Set the position of the particle
 
-		Make sure that new_pos is a vect2d object
-		"""
-		self.pos = new_pos
+        Make sure that new_pos is a vect2d object
+        """
+        self.pos = new_pos
 		
 class Water_Particle(object):
-
     __slots__ = ['mat', 'x', 'y', 'u', 'v', 'dudx', 'dudy', 'dvdx',
                  'dvdy', 'cx', 'cy', 'px', 'py', 'gx', 'gy','shape','inLiquid','m']
-
+    ##############Comments?
     def __init__(self, mat, x, y, u, v,shape):
         self.m = 1
         self.inLiquid = False
@@ -396,38 +381,32 @@ class Water_Particle(object):
         self.y = y
         self.u = u
         self.v = v
-     
         self.dudx = 0
         self.dudy = 0
         self.dvdx = 0
         self.dvdy = 0
         self.cx = 0
         self.cy = 0
-     
         self.px = [0, 0, 0]
         self.py = [0, 0, 0]
         self.gx = [0, 0, 0]
         self.gy = [0, 0, 0]
- 
+        ################
 
 class Material(object):
-
     __slots__ = ['m', 'rd', 'k', 'v', 'd', 'g']
-    
+    ############Comments?
     def __init__(self, m, rd, k, v, d, g):
-
         self.m = m;
         self.rd = rd;
         self.k = k;
         self.v = v;
         self.d = d;
         self.g = g;
-
+    ############
 
 class Visual(object):
-
     def __init__(self, screenSize, liquidTest):
-        
         self.liquidTest = liquidTest
         self.screenSize = screenSize
         self.screen = pygame.display.set_mode(screenSize)
@@ -450,7 +429,6 @@ class Visual(object):
         self.mouse_force = 1    #Coefficient for force exerted by mouse
         self.damping = 0.5    #Damping coefficient
         self.vel_max = 50     #Velocity at which the drag force kicks in
-        self.rod_color=(120,120,0)  #NEW: Used for color of connecting rods
         self.collision = collision_engine(self,self.particle_list,self.all_particles) 
         self.solid = False
         ##################
@@ -465,12 +443,6 @@ class Visual(object):
                 if event.type == QUIT:
                     pygame.quit()
                     raise SystemExit
-                '''if event.type == MOUSEBUTTONDOWN:
-                    self.liquidTest.pressed = True
-                elif event.type == MOUSEBUTTONUP:
-                    self.liquidTest.pressed = False
-                elif event.type == MOUSEMOTION:
-                    self.liquidTest.mx, self.liquidTest.my = event.pos'''
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     (pick_x,pick_y) = pygame.mouse.get_pos()   #Get mouse position on screen
                     picked = vect2d(pick_x,pick_y)  #Turn mouse position into a vector
@@ -489,9 +461,9 @@ class Visual(object):
                         
                     
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_c:
+                    if event.key == pygame.K_c: #Press and hold c to set pop to true
                         self.pop =True
-                    if event.key == pygame.K_z:
+                    if event.key == pygame.K_z: #Press and hold hold z to set spawn to true
                         self.spawn = True
                     elif event.key == pygame.K_RETURN:
                         if self.solid == True:
@@ -499,62 +471,69 @@ class Visual(object):
                         else:
                             self.solid = True
                 if event.type == pygame.KEYUP:
-                    #if event.key == pygame.K_c:
-                        self.pop =False
-                    #elif event.key == pygame.K_z:
-                        self.spawn = False;
+                    self.pop =False
+                    self.spawn = False;
                 
-            if self.pop == True:
+            if self.pop == True: #If pop is true, delete oldest particles
                 if(len(self.liquidTest.particles)>0):
                         self.liquidTest.particles.pop(0)
                 if(len(self.all_particles)>2):
     		      self.all_particles.pop(2)
     	       
-            if self.spawn == True:  
+            if self.spawn == True: #If spawn is true, spawn particles at pipe's location
                 p = Water_Particle(self.liquidTest.water, (16+random.randrange(-4,4))/4, (16+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
                 self.liquidTest.particles.append(p)
                 self.all_particles.append(p)  
-            #self.display()
             
                 
             getattr(self,self.numerical)()
             self.collision.find_collision()  #Check to see if object hits the walls
-            if pygame.mouse.get_pressed()[2]:
+            if pygame.mouse.get_pressed()[2]: #If right mouse is pressed, spawn particles at mouse's location
                 x, y = pygame.mouse.get_pos()
                 p = Water_Particle(self.liquidTest.water, (x+random.randrange(-4,4))/4, (y+random.randrange(-4,4))/4, 0.0, 0.0,"water_particle")
                 self.liquidTest.particles.append(p)
                 self.all_particles.append(p)
 
             self.screen.fill(Color('white'))
+            
+            #Draw static lines two static lines at different positions
             pygame.draw.line(self.screen, (0,0,0), (0,50), (125,100), 1)
             pygame.draw.line(self.screen, (0,0,0), (75,200), (200,150), 1)
             
             ############## Draw Liquid/particles
             for particle in self.liquid_list:
                 if particle.shape =="liquid":
-                    #pygame.draw.rect(self.screen,(0,0,255),[(int(particle.UL.x),int(particle.UL.y)),(int(particle.UR.x),int(particle.UR.y)),(int(particle.LR.x),int(particle.LR.y)),(int(particle.LL.x),int(particle.LL.y)),0])  
-                    #pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)],False)
                     if self.solid == False:
                         pygame.draw.rect(self.screen, (0,0,255), [particle.UL.x, particle.secretHeight+5, particle.LR.x, particle.LR.y],2)
                     else:
                         pygame.draw.rect(self.screen, (0,0,255), [particle.UL.x, particle.secretHeight+5, particle.LR.x, particle.LR.y],0)
-                    		  
-            for particle in self.particle_list:
-                if particle.shape == "circle":
-                    pygame.draw.circle(self.screen, (0,0,255), (int(particle.pos.x), int(particle.pos.y)), particle.size, 1)	  
+                    		  	  
             ################
             self.liquidTest.simulate()
-            print len(self.liquidTest.particles)
+            print len(self.liquidTest.particles) #Prints out number of particles in world
+            
+            #Set boundary for static lines
             self.line_boundary(vect2d(0,50/4),vect2d(125/4,100/4))
             self.line_boundary(vect2d(75/4,200/4),vect2d(200/4,150/4))
-            self.liquidTest.paint(self.screen)
+            
+            self.liquidTest.draw(self.screen)
+            
+            #Creates red buoyant sphere 
+            for particle in self.particle_list:
+                if particle.shape == "circle":
+                    pygame.draw.circle(self.screen, (255,0,0), (int(particle.pos.x), int(particle.pos.y)), particle.size*2, 0)
+                    
+            #Draws two rectangles to create a pipe at the top left corner of the world
             pygame.draw.rect(self.screen,(200,200,235),(7,0,17,18),0)
             pygame.draw.rect(self.screen,(200,200,235),(5,12,21,6),0)
+            
             pygame.display.update()
+            
+            #Displays FPS as the caption
             pygame.display.set_caption('fps: %d' % self.clock.get_fps()," len %d" % len(self.liquidTest.particles))
 
             self.clock.tick(60)
-    
+    ########Comments?
     def line_boundary(self,start,end):
         r = start-end
         m = r.y/r.x
@@ -584,16 +563,9 @@ class Visual(object):
                     
                     #Si.vel.x *= -1
                     i.vel.y *= -1 
-   ##############################################################
+   #########
    
-   
-    def setup_world(self):
-        """Create a pygame window"""
-        pygame.init()
-        self.screen = pygame.display.set_mode((self.width,self.height))
-        pygame.display.set_caption('PHYS-360 Homework 7')
-        self.screen.fill(self.background_color)
-        self.clock = pygame.time.Clock()
+
 
     def set_numerical(self,method):
         """Change the self.numerical variable to use a different update method
@@ -611,38 +583,27 @@ class Visual(object):
             self.particle_list.append(particle)
             self.all_particles.append(particle)
 
-    def add_rod(self,part1,part2):
-        """NEW: Adds a rod constraing between two particles with length equal to separation at initial time
-        
-        The length of the rod is set to the original distance between the two particles.  Particle class
-        has new property called rod_connection.  This is a dictionary that uses the name of the particle as a key and the length of the rod 
-        as the associated value.  You may want to look up python dictionary. 
-        """
-        L = (part1.pos - part2.pos).mag()  #Length of rod
-        part1.rod_connection[part2] = L
-        part2.rod_connection[part1] = L
-
     def new_force(self,force,particles):
-		"""Add a force to the list of forces calculated
+        """Add a force to the list of forces calculated
 
-		'particles' should be a list of all particles experiencing the force.  Some
-		forces require other parameters and those should be included in the 'particles' list
-		(e.g. see spring force defintion below)
-		"""
-		self.force_que.append([force,particles])
+        'particles' should be a list of all particles experiencing the force.  Some
+        forces require other parameters and those should be included in the 'particles' list
+        (e.g. see spring force defintion below)
+        """
+        self.force_que.append([force,particles])
 
     def update(self):
-		"""Update the positions and velocities of all particles
+        """Update the positions and velocities of all particles
 
-		Should also include boundary(), self.game_controls(), self.v_max_check(),
-		and should use getattr() to call the numerical method used to solve
-		the equations of motion.
-		"""
-		self.game_controls()
-		getattr(self,self.numerical)()  #Solve equations of motion
-		self.collision.find_collision()  #Check to see if object hits the walls
-		self.display()
-		self.screen.fill(earth.background_color)  
+        Should also include boundary(), self.game_controls(), self.v_max_check(),
+        and should use getattr() to call the numerical method used to solve
+        the equations of motion.
+        """
+        self.game_controls()
+        getattr(self,self.numerical)()  #Solve equations of motion
+        self.collision.find_collision()  #Check to see if object hits the walls
+        self.display()
+        self.screen.fill(earth.background_color)  
 
 
     def display(self):
@@ -650,15 +611,9 @@ class Visual(object):
         for particle in self.particle_list:
             if particle.shape == "circle":
                 pygame.draw.circle(self.screen, (0,0,255), (int(particle.pos.x), int(particle.pos.y)), particle.size, 1)
-            if particle.shape =="rectangle":
-                particle.theta = particle.theta + particle.omega
-		      #particle.theta = particle.theta+particle.omega*self.dt  
-		      #print particle.pos.x+particle.width/2, particle.UL.x
-		      #pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)])
-        
+
         for particle in self.liquid_list:
             if particle.shape =="liquid":
-                #pygame.draw.rect(self.screen,(0,0,255),[(int(particle.UL.x),int(particle.UL.y)),(int(particle.UR.x),int(particle.UR.y)),(int(particle.LR.x),int(particle.LR.y)),(int(particle.LL.x),int(particle.LL.y)),0])  
                 pygame.draw.aalines(self.screen,(0,0,255),True,[(particle.UL.x,particle.UL.y),(particle.UR.x,particle.UR.y),(particle.LR.x,particle.LR.y),(particle.LL.x,particle.LL.y)],False)
                 
         pygame.display.flip()
@@ -697,25 +652,17 @@ class Visual(object):
             
             particle.pos = particle.pos + (1/6)*(particle.k1+2*particle.k2+2*particle.k3+particle.k4)
             particle.vel = particle.vel + (1/6)*(particle.L1+2*particle.L2+2*particle.L3+particle.L4)
-            
-            if particle.shape == "rectangle":
-                #print particle.UL.x,particle.UL.y
-                particle.UL = vect2d(particle.pos.x+particle.width/2*math.cos(particle.theta)-(particle.height/2)*math.sin(particle.theta),particle.pos.y+particle.height/2*math.cos(particle.theta)+(particle.width/2)*math.sin(particle.theta))
-                particle.UR = vect2d(particle.pos.x-particle.width/2*math.cos(particle.theta)-(particle.height/2)*math.sin(particle.theta),particle.pos.y+particle.height/2*math.cos(particle.theta)-(particle.width/2)*math.sin(particle.theta))
-                particle.LL = vect2d(particle.pos.x+particle.width/2*math.cos(particle.theta)+(particle.height/2)*math.sin(particle.theta),particle.pos.y-particle.height/2*math.cos(particle.theta)+(particle.width/2)*math.sin(particle.theta))
-                particle.LR = vect2d(particle.pos.x-particle.width/2*math.cos(particle.theta)+(particle.height/2)*math.sin(particle.theta),particle.pos.y-particle.height/2*math.cos(particle.theta)-(particle.width/2)*math.sin(particle.theta))
-                #print particle.pos.x,particle.shape
 
     def net_force(self):
-		"""Find net force for all particles
+        """Find net force for all particles
 
-		Set net force for each particle to zero at start of the time setup_world
-		and then run through the force_que to find net force on each particle
-		"""
-		for i in self.particle_list:
-			i.reset_force()   #Reset all net forces to zero
-		for f in self.force_que:
-			getattr(self,f[0])(f[1])  #Calls all force methods listed in force_que
+        Set net force for each particle to zero at start of the time setup_world
+        and then run through the force_que to find net force on each particle
+        """
+        for i in self.particle_list:
+            i.reset_force()   #Reset all net forces to zero
+        for f in self.force_que:
+            getattr(self,f[0])(f[1])  #Calls all force methods listed in force_que
 
     def const_grav(self,particles):
         """Constant gravitational field
@@ -726,9 +673,9 @@ class Visual(object):
             force = vect2d(0,0)
             force = particle.m * self.g
             particle.f_net= particle.f_net + force
-            
+    
+    #Caluclate buoyancy of object using object's size, density, area, and gravity of world
     def object_buoyancy(self,particles):
-        
         for particle in particles:
             vol = 1.3333333 * 3.14 * math.pow(particle.size, 3)
             vol2 = particle.size* (particle.size*particle.d)*particle.size
@@ -738,18 +685,21 @@ class Visual(object):
                     particle.f_net= particle.f_net - buoyancy
                 elif particle.inLiquid == False:
                     particle.f_net = particle.f_net
-                    #return buoyancy
                 elif particle.shape == "water particle":
                     print "Test"
-            
+    
+    #Get rid of? doesnt do anything if removed?
+    """
     def object_gravity(self, mass):
         gravity_force = mass * self.gravity #N
         return gravity_force
-        
+
+    
     def surface_area(self, radius):
         area = 4 * self.pi * math.pow(radius, 2)
         return area
-            
+    """
+        
     def drag(self,particles):
         """Apply drag force to particles
         
@@ -762,36 +712,10 @@ class Visual(object):
                 p = .5
                 i.drag_coeff = .05
                 dragF = p*i.vel.mag2()*-i.drag_coeff*i.vel.norm()
-                #print dragF,"drag"
                 i.f_net = i.f_net + dragF
             elif i.vel.mag() > self.vel_max:
                 i.drag_coeff = .000001
                 i.add_force(-i.drag_coeff*i.vel.mag2()*i.vel)
-
-    def spring(self,particles):
-        """Spring force between two particles
-        
-        Assumes only two particles are passed.  If you have more than
-        two particles you will need to midify the code.  The argument 'particles' should be a
-        list containing the two particles, the spring constant, and the relaxed separation distance
-        """
-        k = particles[2]
-        l0 = particles[3]
-        
-        length = vect2d(0,0)
-        length = particles[0].pos - particles[1].pos
-        
-        lMag = length.mag()
-        lHat = vect2d(0,0)
-        lHat.x = length.x/lMag
-        lHat.y = length.y/lMag
-        s = length.mag() - l0
-        
-        particles[0].f_net.x += -k * s*lHat.x
-        particles[0].f_net.y += -k * s*lHat.y
-        
-        particles[1].f_net.x += k * s*lHat.x
-        particles[1].f_net.y += k * s*lHat.y
 
     def mouse_pull(self,particle):
         """Force applied by selecting particle with mouse"""
@@ -824,146 +748,97 @@ class Visual(object):
                 self.selected = None    #No particles are selected
 
 class collision_engine():
-	def __init__(self,world, particle_list=[],all_particles=[]):
-		self.world = world  #World instance used by this collision engine
-		self.particle_list = particle_list   #List of all particles in the world
-		self.all_particles = all_particles
-		self.has_collided = []    #List of particles that have collided with each other
-		self.has_collidedR = []
-		self.cor = 0.99   #Coefficient of restitution for hitting walls
+    def __init__(self,world, particle_list=[],all_particles=[]):
+        self.world = world  #World instance used by this collision engine
+        self.particle_list = particle_list   #List of all particles in the world
+        self.all_particles = all_particles
+        self.has_collided = []    #List of particles that have collided with each other
+        self.has_collidedR = []
+        self.cor = 0.99   #Coefficient of restitution for hitting walls
 		
 
 
-	def find_collision(self):
-		"""EDIT: Runs through all particles in particle_list to look for overlapping particles
+    def find_collision(self):
+        """EDIT: Runs through all particles in particle_list to look for overlapping particles
 
-		Needs to check and see if particle has a rod connection and if it does, call check_rod_constraint
-		"""
-		
-		self.has_collided = []   #Reset collisions
-		self.has_collidedR = []
-		self.boundary()    #See if any particles collide with the wall
-		for p in combinations(self.all_particles,2):
-		    if p[0].shape =="liquid" and p[1].shape == "water_particle":
-    		       
-    		       if p[1].y/.2475>= p[0].secretHeight:
-    		         
-    		           if(len(self.world.liquidTest.particles)>200):
-    		               
-    		               self.world.liquidTest.particles.pop(0)
-    		               self.world.all_particles.pop(2)
-    		              
-    		           p[0].secretHeight = p[1].y/.255
-    		           
-    		           
-    		  
-		    elif p[0].shape =="liquid" and p[1].shape == "circle":
-		      #print p[1].pos.y - p[0].UR.y
-		      
-		      if p[0].secretHeight<=p[1].pos.y:
-		         
-		          p[1].inLiquid = True
-		       
-		          if p[1].pos.y - p[0].UR.y>= p[1].size:
-		              p[1].submerged = True
-		          if(abs(p[1].pos.y-p[0].secretHeight)>p[1].size):
-		              p[1].d = 1
-		          else:
-		              p[1].d=abs(p[1].pos.y-p[0].secretHeight)/p[1].size
-		          #print p[1].d
-		      else:
-		          p[1].inLiquid = False
-		          p[1].submerged = True
-		          #print p[1].inLiquid
-		    
-		        
-		'''for p in combinations(self.particle_list,2):
-			self.bounding_sphere(p[0],p[1])
-			if p[0] in p[1].rod_connection:
-				self.check_rod_constraint(p[0],p[1],p[0].rod_connection[p[1]])
-		
-		if len(self.has_collided)> 0:  #If any particles have collided
-			self.resolve_collision()  
-	        '''
-	def bounding_sphere(self,particle1,particle2):
-		"""Check for overlap using bounding spheres"""
-		if particle1.shape == "circle" and particle2.shape == "circle":
-                    combinedSize = particle1.size + particle2.size
-  		    if(abs(particle1.pos.x-particle2.pos.x) <= combinedSize):
-  		        if(abs(particle1.pos.y-particle2.pos.y) <= combinedSize):
-  		            self.has_collided.append([particle1,particle2])
-                        self.resolve_collision()  
-	      
-	def resolve_collision(self):
-		"""Changes velocities of point particles that have collided"""
-                for particles in self.has_collided:
-                    if particles[0].shape == "rectangle" or particles[1].shape == "rectangle":
-                        self.rectangle_collision()
+        Needs to check and see if particle has a rod connection and if it does, call check_rod_constraint
+        """
+        self.has_collided = []   #Reset collisions
+        self.has_collidedR = []
+        self.boundary()    #See if any particles collide with the wall
+        for p in combinations(self.all_particles,2):
+            if p[0].shape =="liquid" and p[1].shape == "water_particle":	       
+                if p[1].y/.2475>= p[0].secretHeight:
+                    if(len(self.world.liquidTest.particles)>200):	               
+                        self.world.liquidTest.particles.pop(0)
+                        self.world.all_particles.pop(2)  
+                    p[0].secretHeight = p[1].y/.255
+            elif p[0].shape =="liquid" and p[1].shape == "circle":
+                if p[0].secretHeight<=p[1].pos.y:
+                    p[1].inLiquid = True
+                    if(abs(p[1].pos.y-p[0].secretHeight)>p[1].size):
+                        p[1].d = 1
                     else:
-      		    #print particles[0],particles[1]
-          		    rHat = self.collision_normal(particles[0],particles[1])
-          		    
-          		    difference = particles[1].vel-particles[0].vel
-          		    dv1 = (particles[1].m*(particles[0].cor)*(difference.dot(rHat)))/(particles[0].m+particles[1].m)
-            		  
-          		    dv2 = (-particles[0].m*(particles[1].cor)*(difference.dot(rHat)))/(particles[0].m+particles[1].m)
-          		    
-          		    particles[0].vel.x = particles[0].vel.x +dv1*rHat.x
-          		    particles[0].vel.y = particles[0].vel.y +dv1*rHat.y
-          		    
-          		    particles[1].vel.x = particles[1].vel.x +dv2*rHat.x
-          		    particles[1].vel.y = particles[1].vel.y +dv2*rHat.y	
-	def boundary(self):
-		"""Checks to see if part of a particle leaves the screen.  Should shift particle back on to screen and reverse component of velocity
+                        p[1].d=abs(p[1].pos.y-p[0].secretHeight)/p[1].size
+            else:
+                p[1].inLiquid = False
 
-		This method has been moved from the world class.  It makes more sense to have it be part of the collision engine
-		"""
-		for particle in self.particle_list:
-		    if particle.shape == "circle" :
-              		if particle.pos.x > self.world.width - particle.size:
-              		    particle.vel.x *= -1*self.cor
-              		    particle.pos.x = self.world.width - particle.size
-              		elif particle.pos.x < 0+particle.size:
-             		     particle.vel.x *= -1*self.cor
-             		     particle.pos.x = particle.size
+
+    def bounding_sphere(self,particle1,particle2):
+        """Check for overlap using bounding spheres"""
+        if particle1.shape == "circle" and particle2.shape == "circle":
+            combinedSize = particle1.size + particle2.size
+            if(abs(particle1.pos.x-particle2.pos.x) <= combinedSize):
+                if(abs(particle1.pos.y-particle2.pos.y) <= combinedSize):
+                    self.has_collided.append([particle1,particle2])
+                self.resolve_collision()  
+	      
+
+    def resolve_collision(self):
+        """Changes velocities of point particles that have collided"""
+        for particles in self.has_collided:
+            rHat = self.collision_normal(particles[0],particles[1])
+            
+            difference = particles[1].vel-particles[0].vel
+            
+            dv1 = (particles[1].m*(particles[0].cor)*(difference.dot(rHat)))/(particles[0].m+particles[1].m)
+            dv2 = (-particles[0].m*(particles[1].cor)*(difference.dot(rHat)))/(particles[0].m+particles[1].m)
+            
+            particles[0].vel.x = particles[0].vel.x +dv1*rHat.x
+            prticles[0].vel.y = particles[0].vel.y +dv1*rHat.y
+            
+            particles[1].vel.x = particles[1].vel.x +dv2*rHat.x
+            particles[1].vel.y = particles[1].vel.y +dv2*rHat.y	
+	
+
+    def boundary(self):
+        """
+        World boundary for buoyant object
+        """
+        for particle in self.particle_list:
+            if particle.shape == "circle" :
+                if particle.pos.x > self.world.width - particle.size:
+                    particle.vel.x *= -1*self.cor
+                    particle.pos.x = self.world.width - particle.size
+                elif particle.pos.x < 0+particle.size:
+                    particle.vel.x *= -1*self.cor
+                    particle.pos.x = particle.size
              		     
-          		if particle.pos.y > self.world.height - particle.size:
-          		    particle.pos.y = self.world.height-particle.size
-              		    particle.vel.y *= -1*self.cor
-              		elif particle.pos.y < 0+particle.size:
-             		     particle.pos.y = particle.size
-             		     particle.vel.y *= -1*self.cor
-             	    '''	     
-                    elif particle.shape == "rectangle":
-                        
-                        maxW = max(particle.UL.x,particle.UR.x,particle.LL.x,particle.LR.x)
-                        minW = min(particle.UL.x,particle.UR.x,particle.LL.x,particle.LR.x)
-                        maxY = max(particle.UL.y,particle.UR.y,particle.LL.y,particle.LR.y)
-                        minY = min(particle.UL.y,particle.UR.y,particle.LL.y,particle.LR.y)
-                        bWidth = (maxW-minW)/2
-                        bHeight = (maxY -minY)/2
-                        
-                        #print "Max", particle.width/2,bWidth/2
-                        if particle.pos.x > self.world.width - bWidth:
-          		    particle.vel.x *= -1*particle.cor
-          		    particle.pos.x = self.world.width - bWidth
-          		elif particle.pos.x < 0+bWidth:
-         		     particle.vel.x *= -1*particle.cor
-         		     particle.pos.x = bWidth
-         		     
-         		if particle.pos.y > self.world.height - bHeight:
-         		    particle.pos.y = self.world.height-bHeight
-          		    particle.vel.y *= -1*particle.cor
-          		elif particle.pos.y < 0+bHeight:
-          		     particle.pos.y = bHeight
-         		     particle.vel.y *= -1*particle.cor	
-                    '''
+            if particle.pos.y > self.world.height - particle.size:
+                particle.pos.y = self.world.height-particle.size
+                particle.vel.y *= -1*self.cor
+            elif particle.pos.y < 0+particle.size:
+                particle.pos.y = particle.size
+                particle.vel.y *= -1*self.cor
+
+
+
 def main():
 
     os.environ['SDL_VIDEO_CENTERED'] = '1'
 
     liquidTest = LiquidTest(54, 81, 4, 15)
-    visual = Visual((200, 400), liquidTest)
+    visual = Visual((500, 400), liquidTest) #Sets window of world
     visual.set_numerical('rk4')  
 
     water = liquid(visual,vect2d(100,0))
